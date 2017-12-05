@@ -1,4 +1,4 @@
-minebackup.sh
+minebackup.sh - Edited for use of /mnt/mchost-backups and mark2 sessions
 =============
 
 Bash script to backup Minecraft servers using `rdiff-backup` CPU and I/O friendly.
@@ -36,7 +36,7 @@ You can also override:
 ## Bash script
 
     cd /usr/local/src
-    git clone https://github.com/frdmn/minebackup.sh.git
+    git clone https://github.com/ethanbayliss/minebackup.sh.git
     ln -s /usr/local/src/minebackup.sh/minebackup.sh /usr/bin/minebackup
     mkdir -p /opt/backups/minecraft
     chown -R ${USER} /opt/backups

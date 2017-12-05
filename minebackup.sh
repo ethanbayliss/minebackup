@@ -2,6 +2,7 @@
 # minebackup was built to backup Minecraft servers using rdiff-backup 
 # Copyright (C) 2013 Jonas Friedmann - License: Attribution-NonCommercial-ShareAlike 3.0 Unported
 # Based on Natenom's mcontrol (https://github.com/Natenom/mcontrol)
+# Edited for ethanbayliss' use
 
 #####
 # Settings
@@ -18,15 +19,15 @@ RUNBACKUP_NICE="${BIN_NICE} -n19"
 RUNBACKUP_IONICE="${BIN_IONICE} -c 3"
 
 # Messages
-SAY_BACKUP_START="Backup started..."
+SAY_BACKUP_START="Backup started...feel the lag"
 SAY_BACKUP_FINISHED="Backup successfully finished."
 
 #####
 # DO NOT EDIT BELOW
 #####
 
-# Read user settings from ~/.minebackup.conf
-SETTINGS_FILE="$HOME/.minebackup.conf"
+# Read user settings from ${PWD}/.minebackup.conf
+SETTINGS_FILE="${PWD}/.minebackup.conf"
 
 # Check if $SETTINGS_FILE exist
 if [ -f $SETTINGS_FILE ]
@@ -41,22 +42,22 @@ SCREENNAME="minecraft"
 # Display name of your server
 SERVERNAME="Minecraft Server"
 # Server root directory
-SERVERDIR="/opt/minecraft"
+SERVERDIR="/opt/default"
 # Backup directory
-BACKUPDIR="/opt/backups/minecraft"
+BACKUPDIR="/mnt/mchost-backups/"
 # Filename for full backup (using tar)
-FULLBACKUP="/opt/backups/minecraft.tar.gz"
+FULLBACKUP="/mnt/mchost-backups/minecraft.tar.gz"
 # Quota for backup directory
-BACKUP_QUOTA_MiB=5000
+BACKUP_QUOTA_MiB=50000
 
 # Exclude the following files/directories in backups
-RDIFF_EXCLUDES=(server.log plugins/dynmap/web/tiles/)
+RDIFF_EXCLUDES=(server.log plugins/dynmap/web/tiles/ plugins/WorldEdit/)
 
 ## Overridable configurations (remove "#" to activate)
 #RUNBACKUP_NICE="${BIN_NICE} -n19"
 #RUNBACKUP_IONICE="${BIN_IONICE} -c 3"
 
-#SAY_BACKUP_START="Backup started..."
+#SAY_BACKUP_START="Backup started...feel the lag"
 #SAY_BACKUP_FINISHED="Backup successfully finished."
 EOCONF
 fi
@@ -111,15 +112,16 @@ function as_user() {
 
 # 'Check running process' function
 function is_running() {
-  [ ${DODEBUG} -eq 1 ] && set -x
-  if ps aux | grep -v grep | grep SCREEN | grep $SCREENNAME >/dev/null 2>&1
+  #[ ${DODEBUG} -eq 1 ] && set -x
+  mark2 list | grep vanilla > /dev/null
+  if [ $? -eq 1 ]
   then
     return 0 
   else
     return 1
   fi
 }
-
+#############################################################FINISH BELOW
 # 'Disable ingame saving' function
 function mc_saveoff() {
     [ ${DODEBUG} -eq 1 ] && set -x

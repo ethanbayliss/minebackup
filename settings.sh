@@ -27,7 +27,7 @@ BACKUPDIR="/mnt/mchost-backups/minecraft/"
 # Filename for full backup (using tar)
 FULLBACKUP="/mnt/mchost-backups/minecraft/$(date +%Y%m%d).tar.gz"
 # Quota for backup directory
-BACKUP_QUOTA_MiB=50000
+BACKUP_QUOTA_MiB=40000
 
 # Exclude the following files/directories in backups
 RDIFF_EXCLUDES=(plugins/dynmap/web/tiles/ plugins/WorldEdit/)

@@ -24,7 +24,7 @@ SERVERDIR="/opt/${SESSIONNAME}"
 # Backup directory
 BACKUPDIR="/mnt/mchost-backups/${SESSIONNAME}/"
 # Filename for full backup (using tar)
-FULLBACKUP=${BACKUPDIR}/$(date +%Y%m%d).tar.gz"
+FULLBACKUP="${BACKUPDIR}/$(date +%Y%m%d).tar.gz"
 # Quota for backup directory
 BACKUP_QUOTA_MiB=40000
 

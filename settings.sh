@@ -18,8 +18,6 @@ SAY_BACKUP_FINISHED="Backup successfully finished."
 
 # Mark session name
 SESSIONNAME="minecraft"
-# Display name of your server
-SERVERNAME="Minecraft Server"
 # Server root directory
 SERVERDIR="/opt/minecraft"
 # Backup directory

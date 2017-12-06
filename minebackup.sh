@@ -2,7 +2,7 @@
 # minebackup was built to backup Minecraft servers using rdiff-backup 
 # Copyright (C) 2013 Jonas Friedmann - License: Attribution-NonCommercial-ShareAlike 3.0 Unported
 # Based on Natenom's mcontrol (https://github.com/Natenom/mcontrol)
-# Edited for ethanbayliss' use
+# Edited for ethanbayliss' use on mark2 sessions
 
 # Check if binaries exist
 BINS=( "${BIN_RDIFF} ${BIN_TAR} ${BIN_NICE} ${BIN_IONICE}" )
@@ -22,29 +22,26 @@ then
   exit 1
 fi
 
-# Check quota
-function trim_to_quota() {
-  [ ${DODEBUG} -eq 1 ] && set -x
+function warn_quota() {
   local quota=$1
   local _backup_dir="${BACKUPDIR}"
   _size_of_all_backups=$(($(du -s ${_backup_dir} | cut -f1)/1024))
-
-  while [ ${_size_of_all_backups} -gt $quota ];
-  do
-    echo ""
-    echo "Total backup size of ${_size_of_all_backups} MiB has reached quota of $quota MiB."
-    local _increment_count=$(($(${BIN_RDIFF} --list-increments ${_backup_dir}| grep -o increments\. | wc -l)-1))
-    echo "  going to --force --remove-older-than $((${_increment_count}-1))B"
-    ${RUNBACKUP_NICE} ${RUNBACKUP_IONICE} ${BIN_RDIFF} --force --remove-older-than $((${_increment_count}-1))B "${BACKUPDIR}" >/dev/null 2>&1
-    echo "  Removed."
-    _size_of_all_backups=$(($(du -s ${_backup_dir} | cut -f1)/1024))
-  done
-  echo "Total backup size (${_size_of_all_backups} MiB) <= ($quota MiB)... done"
+  
+  if [ ! -e ${SERVERDIR}/backup.log ]
+  then
+    as_user "touch ${SERVERDIR}/backup.log"
+    as_user "echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] Created backup log file" >> ${SERVERDIR}/backup.log"
+    as_user "echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] This file will log quota errors and other errors that the script encounters" >> ${SERVERDIR}/backup.log"
+  fi
+  
+  if [ $_size_of_all_backups -gt $quota ]
+  then
+    as_user "echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] Exceeded quota: ${_backup_dir}($(($(du -s ${_backup_dir} | cut -f1)/1024))MiB) > (${quota}MiB)" >> ${SERVERDIR}/backup.log"
+  fi
 }
 
 # 'Check executive user' function
 function as_user() {
-  [ ${DODEBUG} -eq 1 ] && set -x
   if [ "$(whoami)" = "${USER}" ] ; then
     /bin/bash -c "$1" 
   else
@@ -54,51 +51,46 @@ function as_user() {
 
 # 'Check running process' function
 function is_running() {
-  #[ ${DODEBUG} -eq 1 ] && set -x
-  mark2 list | grep vanilla > /dev/null
-  if [ $? -eq 1 ]
+  as_user "mark2 list | grep ${SESSIONNAME} > /dev/null"
+  if [ $? -eq 0 ]
   then
     return 0 
   else
     return 1
   fi
 }
-#############################################################FINISH BELOW
+
 # 'Disable ingame saving' function
 function mc_saveoff() {
-    [ ${DODEBUG} -eq 1 ] && set -x
   if is_running
   then
     echo -ne "${SERVERNAME} is running, suspending saves... "
-    as_user "screen -p 0 -S ${SCREENNAME} -X eval 'stuff \"say ${SAY_BACKUP_START}\"\015'"
-    as_user "screen -p 0 -S ${SCREENNAME} -X eval 'stuff \"save-off\"\015'"
-    as_user "screen -p 0 -S ${SCREENNAME} -X eval 'stuff \"save-all\"\015'"
+    as_user "mark2 send -n ${SESSIONNAME} say Server going into backup mode. Expect Lag..."
+    as_user "mark2 send -n ${SESSIONNAME} save-off"
+    as_user "mark2 send -n ${SESSIONNAME} save-all"
     sync
     sleep 10
-    echo -ne "done\n"
+    echo -ne "[$(date '+%Y-%m-%d %H:%M:%S')] Notified ${SESSIONNAME}'s users, disabled saving, saved and wrote to disk\n"
   else
-    echo "${SERVERNAME} was not running... done"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] ${SESSIONNAME} was not running... unable to disable ingame saving"
   fi
 }
 
 # 'Enable ingame saving' function
 function mc_saveon() {
-        [ ${DODEBUG} -eq 1 ] && set -x
   if is_running
   then
-    echo -ne "${SERVERNAME} is running, re-enabling saves... "
-    as_user "screen -p 0 -S ${SCREENNAME} -X eval 'stuff \"save-on\"\015'"
-    as_user "screen -p 0 -S ${SCREENNAME} -X eval 'stuff \"say ${SAY_BACKUP_FINISHED}\"\015'"
-    echo -ne "done\n"
+    echo -ne "[$(date '+%Y-%m-%d %H:%M:%S')] ${SESSIONNAME} is running, re-enabling saves... "
+    as_user "mark2 send -n ${SESSIONNAME} save-on"
+    as_user "mark2 send -n ${SESSIONNAME} say Backup finished"
+    echo -ne "[$(date '+%Y-%m-%d %H:%M:%S')] Finished backup\n"
   else
-    echo "${SERVERNAME} was not running. Not resuming saves... done"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] ${SERVERNAME} was not running. Not resuming saves... done"
   fi
 }
 
 # Backup function
 function mc_backup() {
-  [ ${DODEBUG} -eq 1 ] && set -x
-
   # Full backup (tar)!
   if [[ ${1} == "full" ]]; then
 
@@ -122,7 +114,7 @@ function mc_backup() {
   fi
 
   [ -d "${BACKUPDIR}" ] || mkdir -p "${BACKUPDIR}"
-  echo -ne "Backing up ${SCREENNAME}... "
+  echo -ne "Backing up ${SESSIONNAME}... "
 
   if [ -z "$(ls -A ${SERVERDIR})" ];
   then
@@ -138,8 +130,8 @@ function mc_backup() {
   done
   ${RUNBACKUP_NICE} ${RUNBACKUP_IONICE} ${BIN_RDIFF} ${_excludes} "${SERVERDIR}" "${BACKUPDIR}"
   echo -ne "done\n"
-
-  trim_to_quota ${BACKUP_QUOTA_MiB} 
+  
+  
 }
 
 # 'List available backups' function
@@ -151,7 +143,7 @@ function listbackups() {
 
   if [ $tempstatus -eq 0 ]
   then
-    echo "Backups for server \"${SERVERNAME}\""
+    echo "Backups for server \"${SESSIONNAME}\""
     [ ${DODEBUG} -eq 1 ] && ${BIN_RDIFF} -l "${BACKUPDIR}"
     ${BIN_RDIFF} --list-increment-sizes "${BACKUPDIR}"
   else
@@ -178,7 +170,7 @@ function restore() {
   fi
 
   # Check for running server
-  echo -ne "Check if '${SERVERNAME}' is not running... "
+  echo -ne "Check if '${SESSIONNAME}' is not running... "
   if is_running
   then
     echo -ne "failed\n"
@@ -197,21 +189,12 @@ function restore() {
 
 # 'List installed crons' function
 function listcrons() {
-  [ ${DODEBUG} -eq 1 ] && set -x
   crontab -l | grep "minebackup"
 }
 
 #####
 # Catch argument
 #####
-
-echo "$@" > /dev/null 2>&1 
-if [ "$_" = '-debug' ];
-then
-    DODEBUG=1
-else
-    DODEBUG=0
-fi
 #Start-Stop here
 case "${1}" in
   listbackups)

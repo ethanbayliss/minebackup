@@ -27,13 +27,6 @@ function warn_quota() {
   local _backup_dir="${BACKUPDIR}"
   _size_of_all_backups=$(($(du -s ${_backup_dir} | cut -f1)/1024))
   
-  if [ ! -e ${SERVERDIR}/backup.log ]
-  then
-    as_user "touch ${SERVERDIR}/backup.log"
-    as_user "echo -e \"[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] Created backup log file\" >> ${SERVERDIR}/backup.log"
-    as_user "echo -e \"[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] This file will log quota errors and other errors that the script encounters\" >> ${SERVERDIR}/backup.log"
-  fi
-  
   if [ $_size_of_all_backups -gt $quota ]
   then
     as_user "echo -e \"[$(date '+%Y-%m-%d %H:%M:%S')] [ERROR] Exceeded quota: ${_backup_dir}($(($(du -s ${_backup_dir} | cut -f1)/1024))MiB) > (${quota}MiB)\" >> ${SERVERDIR}/backup.log"
@@ -190,6 +183,13 @@ function listcrons() {
 # Catch argument
 #####
 #Start-Stop here
+if [ ! -e ${SERVERDIR}/backup.log ]
+  then
+    as_user "touch ${SERVERDIR}/backup.log"
+    as_user "echo -e \"[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] Created backup log file\" >> ${SERVERDIR}/backup.log"
+    as_user "echo -e \"[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] This file will log quota errors and other errors that the script encounters\" >> ${SERVERDIR}/backup.log"
+  fi
+
 case "${1}" in
   listbackups)
     listbackups

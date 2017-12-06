@@ -4,64 +4,6 @@
 # Based on Natenom's mcontrol (https://github.com/Natenom/mcontrol)
 # Edited for ethanbayliss' use
 
-#####
-# Settings
-#####
-
-# Binary names
-BIN_RDIFF="rdiff-backup"
-BIN_TAR="tar"
-BIN_NICE="nice"
-BIN_IONICE="ionice"
-
-# nice and ionice settings
-RUNBACKUP_NICE="${BIN_NICE} -n19"
-RUNBACKUP_IONICE="${BIN_IONICE} -c 3"
-
-# Messages
-SAY_BACKUP_START="Backup started...feel the lag"
-SAY_BACKUP_FINISHED="Backup successfully finished."
-
-#####
-# DO NOT EDIT BELOW
-#####
-
-# Read user settings from ${PWD}/.minebackup.conf
-SETTINGS_FILE="${PWD}/.minebackup.conf"
-
-# Check if $SETTINGS_FILE exist
-if [ -f $SETTINGS_FILE ]
-then
-  . "${SETTINGS_FILE}"
-else
-  # Create default one
-  echo "[INFO] Creating default configuration file $SETTINGS_FILE"
-  cat > $SETTINGS_FILE << EOCONF
-# Screen session name
-SCREENNAME="minecraft"
-# Display name of your server
-SERVERNAME="Minecraft Server"
-# Server root directory
-SERVERDIR="/opt/default"
-# Backup directory
-BACKUPDIR="/mnt/mchost-backups/"
-# Filename for full backup (using tar)
-FULLBACKUP="/mnt/mchost-backups/minecraft.tar.gz"
-# Quota for backup directory
-BACKUP_QUOTA_MiB=50000
-
-# Exclude the following files/directories in backups
-RDIFF_EXCLUDES=(server.log plugins/dynmap/web/tiles/ plugins/WorldEdit/)
-
-## Overridable configurations (remove "#" to activate)
-#RUNBACKUP_NICE="${BIN_NICE} -n19"
-#RUNBACKUP_IONICE="${BIN_IONICE} -c 3"
-
-#SAY_BACKUP_START="Backup started...feel the lag"
-#SAY_BACKUP_FINISHED="Backup successfully finished."
-EOCONF
-fi
-
 # Check if binaries exist
 BINS=( "${BIN_RDIFF} ${BIN_TAR} ${BIN_NICE} ${BIN_IONICE}" )
 for BIN in $BINS;

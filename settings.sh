@@ -19,11 +19,11 @@ SAY_BACKUP_FINISHED="Backup successfully finished."
 # Mark session name
 SESSIONNAME="minecraft"
 # Server root directory
-SERVERDIR="/opt/minecraft"
+SERVERDIR="/opt/${SESSIONNAME}"
 # Backup directory
-BACKUPDIR="/mnt/mchost-backups/minecraft/"
+BACKUPDIR="/mnt/mchost-backups/${SESSIONNAME}/"
 # Filename for full backup (using tar)
-FULLBACKUP="/mnt/mchost-backups/minecraft/$(date +%Y%m%d).tar.gz"
+FULLBACKUP="/mnt/mchost-backups/$SESSIONNAME/$(date +%Y%m%d).tar.gz"
 # Quota for backup directory
 BACKUP_QUOTA_MiB=40000
 
@@ -34,5 +34,5 @@ RDIFF_EXCLUDES=(plugins/dynmap/web/tiles/ plugins/WorldEdit/)
 RUNBACKUP_NICE="${BIN_NICE} -n19"
 RUNBACKUP_IONICE="${BIN_IONICE} -c 3"
 
-SAY_BACKUP_START="Backup started...feel the lag"
-SAY_BACKUP_FINISHED="Backup successfully finished."
+SAY_BACKUP_START="$(date '+%Y-%m-%d %H:%M:%S') Backup started...feel the lag"
+SAY_BACKUP_FINISHED="$(date '+%Y-%m-%d %H:%M:%S') Backup successfully finished."

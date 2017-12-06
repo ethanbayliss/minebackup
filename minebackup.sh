@@ -30,8 +30,8 @@ function warn_quota() {
   if [ ! -e ${SERVERDIR}/backup.log ]
   then
     as_user "touch ${SERVERDIR}/backup.log"
-    as_user "echo -e \"[$(date '+%Y-%m-%d %H:%M:%S')] [STATUS] Created backup log file\" >> ${SERVERDIR}/backup.log"
-    as_user "echo -e \"[$(date '+%Y-%m-%d %H:%M:%S')] [STATUS] This file will log quota errors and other errors that the script encounters\" >> ${SERVERDIR}/backup.log"
+    as_user "echo -e \"[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] Created backup log file\" >> ${SERVERDIR}/backup.log"
+    as_user "echo -e \"[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] This file will log quota errors and other errors that the script encounters\" >> ${SERVERDIR}/backup.log"
   fi
   
   if [ $_size_of_all_backups -gt $quota ]
@@ -70,7 +70,7 @@ function mc_saveoff() {
     as_user "mark2 send -n ${SESSIONNAME} save-all"
     sync
     sleep 10
-    echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] [STATUS] Notified ${SESSIONNAME}'s users, disabled saving, saved and wrote to disk" >> ${SERVERDIR}/backup.log
+    echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] Notified ${SESSIONNAME}'s users, disabled saving, saved and wrote to disk" >> ${SERVERDIR}/backup.log
   else
     echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] [WARNING] ${SESSIONNAME} was not running... unable to disable ingame saving" >> ${SERVERDIR}/backup.log
   fi
@@ -80,10 +80,10 @@ function mc_saveoff() {
 function mc_saveon() {
   if is_running
   then
-    echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] [STATUS] ${SESSIONNAME} is running, re-enabling saves... " >> ${SERVERDIR}/backup.log
+    echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] ${SESSIONNAME} is running, re-enabling saves... " >> ${SERVERDIR}/backup.log
     as_user "mark2 send -n ${SESSIONNAME} save-on"
     as_user "mark2 send -n ${SESSIONNAME} say Backup finished"
-    echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] [STATUS] ${SESSIONNAME} finished backup" >> ${SERVERDIR}/backup.log
+    echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] ${SESSIONNAME} finished backup" >> ${SERVERDIR}/backup.log
   else
     echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] [WARNING] ${SESSIONNAME} was not running. Not resuming saves... done" >> ${SERVERDIR}/backup.log
   fi
@@ -104,17 +104,17 @@ function mc_backup() {
     # Check if permissions are okay
     echo -ne "Check for correct permissions ..."
     touchtest=$((touch $FULLBACKUP) >/dev/null 2>&1)
-    touchstatus=$?
-    [ $touchstatus -eq 0 ] && echo -ne "done\n" && rm $FULLBACKUP
-    [ $touchstatus -ne 0 ] && echo -ne "failed\n> ${touchtest}\n" && exit
+    touchINFO=$?
+    [ $touchINFO -eq 0 ] && echo -ne "done\n" && rm $FULLBACKUP
+    [ $touchINFO -ne 0 ] && echo -ne "failed\n> ${touchtest}\n" && exit
 
-    echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] [STATUS] Making a full tar of ${SERVERDIR} to ${FULLBACKUP}" >> ${SERVERDIR}/backup.log
+    echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] Making a full tar of ${SERVERDIR} to ${FULLBACKUP}" >> ${SERVERDIR}/backup.log
     ${RUNBACKUP_NICE} ${RUNBACKUP_IONICE} ${BIN_TAR} czf ${FULLBACKUP} ${SERVERDIR} ${_tarexcludes} >/dev/null 2>&1
-    echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] [STATUS] Successfully archived ${SERVERDIR} to ${FULLBACKUP}" >> ${SERVERDIR}/backup.log
+    echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] Successfully archived ${SERVERDIR} to ${FULLBACKUP}" >> ${SERVERDIR}/backup.log
   fi
 
   [ -d "${BACKUPDIR}" ] || mkdir -p "${BACKUPDIR}"
-  echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] [STATUS] Creating rdiff of ${SESSIONNAME}... " >> ${SERVERDIR}/backup.log
+  echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] Creating rdiff of ${SESSIONNAME}... " >> ${SERVERDIR}/backup.log
 
   if [ -z "$(ls -A ${SERVERDIR})" ];
   then
@@ -130,7 +130,7 @@ function mc_backup() {
   ${RUNBACKUP_NICE} ${RUNBACKUP_IONICE} ${BIN_RDIFF} ${_excludes} "${SERVERDIR}" "${BACKUPDIR}"
   if [ $? -eq 0 ]
   then
-    echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] [STATUS] rdiff of ${SERVERDIR} successfully created" >> ${SERVERDIR}/backup.log
+    echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] rdiff of ${SERVERDIR} successfully created" >> ${SERVERDIR}/backup.log
   else
     echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] [ERROR] rdiff of ${SERVERDIR} failed" >> ${SERVERDIR}/backup.log
     exit 1
@@ -141,9 +141,9 @@ function mc_backup() {
 # 'List available backups' function
 function listbackups() {
   temptest=`${BIN_RDIFF} -l "${BACKUPDIR}" &>/dev/null`
-  tempstatus=$?
+  tempINFO=$?
 
-  if [ $tempstatus -eq 0 ]
+  if [ $tempINFO -eq 0 ]
   then
     echo "Backups for server \"${SESSIONNAME}\""
     ${BIN_RDIFF} --list-increment-sizes "${BACKUPDIR}"
@@ -176,9 +176,9 @@ function restore() {
   fi
 
   echo -ne "Starting to restore '${arg}' ... "
-  rdiffstatus=$((rdiff-backup --restore-as-of ${arg} --force $BACKUPDIR $SERVERDIR) 2>&1)
+  rdiffINFO=$((rdiff-backup --restore-as-of ${arg} --force $BACKUPDIR $SERVERDIR) 2>&1)
   [ $? -eq 0 ] && echo -ne "successful\n"
-  [ $? -ne 0 ] && echo -ne "failed\n> ${rdiffstatus}\n"
+  [ $? -ne 0 ] && echo -ne "failed\n> ${rdiffINFO}\n"
 }
 
 # 'List installed crons' function

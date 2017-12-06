@@ -9,16 +9,14 @@ Bash script to backup Minecraft servers using `rdiff-backup` CPU and I/O friendl
     minebackup listbackups               List current incremental backups.
     minebackup restore [<MINUTES>/now]   Restore to snapshot [MINUTES] ago. ("now" for the latest)
     minebackup crons                     List configured cronjobs.
-    -debug                               Enable debug output (Must be the last argument).
 
 # Configuration
 
-As you might see, this script creates a configration file in your `$HOME folder.  
+This script uses bash environment variables to store settings. Run settings.sh with the adjusted values for each server before running the script
 
 Make sure you made all adjustments as your needs for the following variables:
 
-* `SCREENNAME`
-* `SERVERNAME`
+* `SESSIONNAME`
 * `SERVERDIR`
 * `BACKUPDIR`
 * `FULLBACKUP`
@@ -36,10 +34,11 @@ You can also override:
 ## Bash script
 
     cd /usr/local/src
-    git clone https://github.com/ethanbayliss/minebackup.sh.git
-    ln -s /usr/local/src/minebackup.sh/minebackup.sh /usr/bin/minebackup
-    mkdir -p /opt/backups/minecraft
-    chown -R ${USER} /opt/backups
+    git clone https://github.com/ethanbayliss/minebackup.git
+    ln -s /usr/local/src/minebackup/minebackup /usr/bin/minebackup
+    #In my case I am using a mounted drive that is rcloned to gdrive every night
+    mkdir -p /mnt/mchost-backups/minecraft
+    chown -R ${USER} /mnt/mchost-backups/
 
 ## Cron job examples
 
@@ -51,18 +50,18 @@ To open the crontab in your default editor:
 
 Differential backup every 15 minutes, fullbackup every day at 0:00 am:
 
-    */15 * * * * /usr/bin/minebackup backup
-    0 0 * * * /usr/bin/minebackup backup full
+    */15 * * * * /opt/minecraft/settings.sh && /usr/bin/minebackup backup
+    0 0 * * * /opt/minecraft/settings.sh && /usr/bin/minebackup backup full
 
 Differential backup every 5 minutes, fullbackup 2 days at 5:30 am:
 
-    */5 * * * * /usr/bin/minebackup backup
-    30 5 */2 * * /usr/bin/minebackup backup full
+    */5 * * * * /opt/minecraft/settings.sh && /usr/bin/minebackup backup
+    30 5 */2 * * /opt/minecraft/settings.sh && /usr/bin/minebackup backup full
 
 Differential backup every 30 minutes, fullbackup every 7 days at 6:45 pm:
 
-    */30 * * * * /usr/bin/minebackup backup
-    45 18 */7 * * /usr/bin/minebackup backup full
+    */30 * * * * /opt/minecraft/settings.sh && /usr/bin/minebackup backup
+    45 18 */7 * * /opt/minecraft/settings.sh && /usr/bin/minebackup backup full
 
 # Dependencies
 

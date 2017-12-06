@@ -35,7 +35,7 @@ You can also override:
 
     cd /usr/local/src
     git clone https://github.com/ethanbayliss/minebackup.git
-    ln -s /usr/local/src/minebackup/minebackup /usr/bin/minebackup
+    ln -s /usr/local/src/minebackup/minebackup /usr/bin/minebackup.sh
     #In my case I am using a mounted drive that is rcloned to gdrive every night
     mkdir -p /mnt/mchost-backups/minecraft
     chown -R ${USER} /mnt/mchost-backups/
@@ -50,18 +50,18 @@ To open the crontab in your default editor:
 
 Differential backup every 15 minutes, fullbackup every day at 0:00 am:
 
-    */15 * * * * /opt/minecraft/backupsettings.sh && /usr/bin/minebackup backup
-    0 0 * * * /opt/minecraft/backupsettings.sh && /usr/bin/minebackup backup full
+    */15 * * * * /opt/minecraft/backupsettings.sh && minebackup backup
+    0 0 * * * /opt/minecraft/backupsettings.sh && minebackup backup full
 
 Differential backup every 5 minutes, fullbackup 2 days at 5:30 am:
 
-    */5 * * * * /opt/minecraft/backupsettings.sh && /usr/bin/minebackup backup
-    30 5 */2 * * /opt/minecraft/backupsettings.sh && /usr/bin/minebackup backup full
+    */5 * * * * /opt/minecraft/backupsettings.sh && minebackup backup
+    30 5 */2 * * /opt/minecraft/backupsettings.sh && minebackup backup full
 
 Differential backup every 30 minutes, fullbackup every 7 days at 6:45 pm:
 
-    */30 * * * * /opt/minecraft/backupsettings.sh && /usr/bin/minebackup backup
-    45 18 */7 * * /opt/minecraft/backupsettings.sh && /usr/bin/minebackup backup full
+    */30 * * * * /opt/minecraft/backupsettings.sh && minebackup backup
+    45 18 */7 * * /opt/minecraft/backupsettings.sh && minebackup backup full
 
 # Dependencies
 

@@ -35,7 +35,7 @@ You can also override:
 
     cd /usr/local/src
     git clone https://github.com/ethanbayliss/minebackup.git
-    ln -s /usr/local/src/minebackup/minebackup /usr/bin/minebackup.sh
+    ln -s /usr/local/src/minebackup/minebackup.sh /usr/bin/minebackup
     #In my case I am using a mounted drive that is rcloned to gdrive every night
     mkdir -p /mnt/mchost-backups/minecraft
     chown -R ${USER} /mnt/mchost-backups/

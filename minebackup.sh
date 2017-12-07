@@ -65,6 +65,7 @@ function mc_saveoff() {
     sleep 10
     echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] Notified ${SESSIONNAME}'s users, disabled saving, saved and wrote to disk" >> ${SERVERDIR}/backup.log
   else
+    echo -e "${SERVERDIR}/backup.log"
     echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] [WARNING] ${SESSIONNAME} was not running... unable to disable ingame saving" >> ${SERVERDIR}/backup.log
   fi
 }

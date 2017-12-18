@@ -1,4 +1,5 @@
 minebackup.sh - Edited for use of /mnt/mchost-backups and mark2 sessions
+BROKEN 
 =============
 
 Bash script to backup Minecraft servers using `rdiff-backup` CPU and I/O friendly.
